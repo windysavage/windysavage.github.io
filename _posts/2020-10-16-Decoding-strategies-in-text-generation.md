@@ -2,8 +2,7 @@
 # Decoding strategies in text generation
 
 ## Auto-regressive language generation
-<div style='text-align: justify;'>
-<p>
+
 
 Auto-regressive language generation assumes that the element  of output sequence at timestep ** t ** is determined by the input sequence and timesteps before $t$.
 
@@ -11,8 +10,6 @@ Auto-regressive language generation assumes that the element  of output sequence
 
 where $W_0$ is the input sequence; $W_t$ is the word at timestep $t$; $T$ is determined by the position of <EOS> token.
 
-</p>
-</div>
 
 <div style='text-align: justify;'>
 <p>
