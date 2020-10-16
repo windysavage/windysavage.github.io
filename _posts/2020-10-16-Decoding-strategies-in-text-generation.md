@@ -5,7 +5,7 @@
 <div style='text-align: justify;'>
 <p>
 
-Auto-regressive language generation assumes that the element  of output sequence at timestep **t** is determined by the input sequence and timesteps before $t$.
+Auto-regressive language generation assumes that the element  of output sequence at timestep ** t ** is determined by the input sequence and timesteps before $t$.
 
 ![](https://i.imgur.com/JKrMxhT.png)
 
