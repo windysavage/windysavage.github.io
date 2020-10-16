@@ -1,21 +1,17 @@
 ###### tags: `NLP`  `transformer` `deep-learning` 
-# Decoding strategies in text generation
-
 ## Auto-regressive language generation
-
-
 Auto-regressive language generation assumes that the element  of output sequence at timestep **t** is determined by the input sequence and timesteps before **t**.
 
 ![](https://i.imgur.com/JKrMxhT.png)
 
-where $W_0$ is the input sequence; $W_t$ is the word at timestep $t$; $T$ is determined by the position of <EOS> token.
+where **W_0** is the input sequence; **W_t** is the word at timestep **t**; **T** is determined by the position of <EOS> token.
 
 
 Thanks to the come out of transformer, a well-knowned seq2seq model architecture, researchers now are able to well deal with lots of NLP problems, e.g. neural machine translation (NMT), text summerization, text generation. In terms of conducting text generation with transformer, decoding strategies play an important role and thus cannot be ignored. The easiest approach is generating tokens with the highest probabilities in each timestep.
 
 ## Beam search (BS)
 
-Beam search (BS) is a common-used algorithm for decoding sequences. When decoding, BS consider the probabilty of whole sequence instead of just considering the word with highest probability at each timestep (greedy search). In other words, BS will maintein $k$ sequences (k is the beam width, you can define it on your own) at the same time, and when there is a new sequence coming, the sequence with lowest probability will be discarded.
+Beam search (BS) is a common-used algorithm for decoding sequences. When decoding, BS consider the probabilty of whole sequence instead of just considering the word with highest probability at each timestep (greedy search). In other words, BS will maintein **k** sequences (k is the beam width, you can define it on your own) at the same time, and when there is a new sequence coming, the sequence with lowest probability will be discarded.
 
 But BS still has some drawbacks:
 - It generates similar sequences and thus lost diversity.
@@ -31,7 +27,7 @@ Instead of picking tokens with the highest probability, we sample from the distr
 
 Besides, we can add a parameter called "Temperature" (range from 0~1) to adjust the distribution of tokens.
 
-```
+{% highlight python %}
 # Temperature
 # make higher p much higher ; make lower p much lower
 # _scores: distribution of tokens
@@ -39,14 +35,14 @@ Besides, we can add a parameter called "Temperature" (range from 0~1) to adjust 
 
 if temperature != 1.0:
     _scores = _scores / temperature
-```
+{% endhighlight %}
 
 ## Top-K/Top-P sampling
 
 
-With sampling, we may face the chance of selecting "weird/improper words" (words with low probability) as our generating tokens. To solve this problem, top-K sampling is introduced to look at tokens with top-K probabilities. That is to say, only top $K$ tokens will be seen as the candidates of the generating sequence. After that, we can sample a token from the distribution formed by the $K$ tokens!
+With sampling, we may face the chance of selecting "weird/improper words" (words with low probability) as our generating tokens. To solve this problem, top-K sampling is introduced to look at tokens with top-K probabilities. That is to say, only top **K** tokens will be seen as the candidates of the generating sequence. After that, we can sample a token from the distribution formed by the **K** tokens!
 
-Nevertheless, we cannot dynamically change the value of $K$ case by case. Thus, top-P sampling come to solve this problem by selecting token candidates until their cumulatiove probability achieves a given $P$. Via top-P sampling, we now can select different amounts of token candidates based on different situations!
+Nevertheless, we cannot dynamically change the value of **K** case by case. Thus, top-P sampling come to solve this problem by selecting token candidates until their cumulatiove probability achieves a given **P**. Via top-P sampling, we now can select different amounts of token candidates based on different situations!
 
 
 
