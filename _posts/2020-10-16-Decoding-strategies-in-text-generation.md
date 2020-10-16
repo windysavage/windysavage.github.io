@@ -28,6 +28,7 @@ Instead of picking tokens with the highest probability, we sample from the distr
 Besides, we can add a parameter called "Temperature" (range from 0~1) to adjust the distribution of tokens.
 
 {% highlight python %}
+
 # Temperature
 # make higher p much higher ; make lower p much lower
 # _scores: distribution of tokens
@@ -35,6 +36,7 @@ Besides, we can add a parameter called "Temperature" (range from 0~1) to adjust 
 
 if temperature != 1.0:
     _scores = _scores / temperature
+
 {% endhighlight %}
 
 ## Top-K/Top-P sampling
