@@ -1,4 +1,11 @@
-###### tags: `NLP`  `transformer` `deep-learning` 
+---
+layout: post
+title:  Decoding strategies in text generation
+date:   2020-10-16 15:01:35 +0800
+image:  02.jpg
+tags:   NLP transformer deep-learning
+---
+
 ## Auto-regressive language generation
 Auto-regressive language generation assumes that the element  of output sequence at timestep **t** is determined by the input sequence and timesteps before **t**.
 
