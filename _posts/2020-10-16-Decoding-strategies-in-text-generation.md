@@ -58,3 +58,6 @@ Nevertheless, we cannot dynamically change the value of $$K$$ case by case. Thus
 ## Reference
 - https://huggingface.co/blog/how-to-generate
 - https://github.com/huggingface/transformers
+
+***
+<small>image from [here](https://unsplash.com/photos/s9CC2SKySJM) </small>
