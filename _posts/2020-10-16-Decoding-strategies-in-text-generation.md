@@ -6,6 +6,11 @@ image:  02.jpg
 tags:   NLP transformer deep-learning
 ---
 
+## Before delving into the details...
+Hi, this post is aimed at introducing common decoding strategies for text generation (ex: GPT-2). Decoding strategies play an important role when developing NLG (Natural Language Generation)models, and the choice of decoding algorithm could have huge impact on the quality of generated sequences!
+
+In this post, I will explain what is auto-regressive language generation first, and then I will move on to the introduction of several decoding algorithms.
+
 ## Auto-regressive language generation
 Auto-regressive language generation assumes that the element  of output sequence at timestep $$t$$ is determined by the input sequence and timesteps before $$t$$.
 
@@ -16,7 +21,8 @@ where $$W_0$$ is the input sequence; $$W_t$$ is the word at timestep $$t$$; $$T$
 
 Thanks to the come out of transformer, a well-knowned seq2seq model architecture, researchers now are able to well deal with lots of NLP problems, e.g. neural machine translation (NMT), text summerization, text generation. In terms of conducting text generation with transformer, decoding strategies play an important role and thus cannot be ignored. The easiest approach is generating tokens with the highest probabilities in each timestep.
 
-## Beam search (BS)
+## Decoding strategies in text generation
+#### Beam search (BS)
 
 Beam search (BS) is a common-used algorithm for decoding sequences. When decoding, BS consider the probabilty of whole sequence instead of just considering the word with highest probability at each timestep (greedy search). In other words, BS will maintein $$k$$ sequences (k is the beam width, you can define it on your own) at the same time, and when there is a new sequence coming, the sequence with lowest probability will be discarded.
 
@@ -27,7 +33,7 @@ But BS still has some drawbacks:
 
 To avoid the repetition of generated sequences, a simple remedy called "n-gram penalty" has come to the stage. The n-gram penalty make sure that there is no n-gram showing up for more than once. That is to say, if there is a generated n-gram has been put into the output sequence before, then its probability would be set to zero.
 
-## Random sampling
+#### Random sampling
 In order to make the output sequences more surprising (which means more similar to humans' behavior), we need to add some randomness into the decoding process.
 
 Instead of picking tokens with the highest probability, we sample from the distribution of tokens at each timestep.
@@ -46,7 +52,7 @@ if temperature != 1.0:
 
 {% endhighlight %}
 
-## Top-K/Top-P sampling
+#### Top-K/Top-P Sampling (Nucleus Sampling)
 
 
 With sampling, we may face the chance of selecting "weird/improper words" (words with low probability) as our generating tokens. To solve this problem, top-K sampling is introduced to look at tokens with top-K probabilities. That is to say, only top $$K$$ tokens will be seen as the candidates of the generating sequence. After that, we can sample a token from the distribution formed by the $$K$$ tokens!
@@ -55,9 +61,9 @@ Nevertheless, we cannot dynamically change the value of $$K$$ case by case. Thus
 
 
 
-## Reference
-- https://huggingface.co/blog/how-to-generate
-- https://github.com/huggingface/transformers
+### Reference
+- [how to generate from huggingface](https://huggingface.co/blog/how-to-generate)
+- [github of Transformers](https://github.com/huggingface/transformers)
 
 ***
 <small>image from [here](https://unsplash.com/photos/s9CC2SKySJM) </small>
