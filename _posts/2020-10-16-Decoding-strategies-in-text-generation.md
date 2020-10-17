@@ -30,7 +30,7 @@ To avoid the repetition of generated sequences, a simple remedy called "n-gram p
 ## Random sampling
 In order to make the output sequences more surprising (which means more similar to humans' behavior), we need to add some randomness into the decoding process.
 
-Instead of picking tokens with the highest probability, we sample from the distribution of tokens at eact timestep.
+Instead of picking tokens with the highest probability, we sample from the distribution of tokens at each timestep.
 
 Besides, we can add a parameter called "Temperature" (range from 0~1) to adjust the distribution of tokens.
 
