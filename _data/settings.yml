@@ -25,18 +25,18 @@ instagram: https://www.instagram.com/rih_hong_food/ # Add your Instagram handle
 
 #-------------------------------
 # Comment Section (Disqus)
-disqus-identifier: mr-brown # add your shortname for Disqus Comment. For example mr-brown
+# disqus-identifier: mr-brown # add your shortname for Disqus Comment. For example mr-brown
 
 
 #-------------------------------
 # Instagram Feed
 instafeed: true # To enable the instafeed, use the value true. To turn off use the value false.
-instagram-profile: artemsheludko_ # Add instagram username
+instagram-profile: rih_hong_food # Add instagram username
 
 
 #-------------------------------
 # Google Analytics
-google-analytics: # Add your identifier. For example UA-99631805-1.
+google-analytics: UA-180638240-1 # Add your identifier. For example UA-99631805-1.
 
 
 #-------------------------------
