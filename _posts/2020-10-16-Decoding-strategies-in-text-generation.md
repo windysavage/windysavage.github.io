@@ -11,7 +11,7 @@ Auto-regressive language generation assumes that the element  of output sequence
 
 ![](https://i.imgur.com/JKrMxhT.png)
 
-where **W_0** is the input sequence; **W_t** is the word at timestep **t**; **T** is determined by the position of <EOS> token.
+where $$ W0 $$ is the input sequence; **W_t** is the word at timestep **t**; **T** is determined by the position of <EOS> token.
 
 
 Thanks to the come out of transformer, a well-knowned seq2seq model architecture, researchers now are able to well deal with lots of NLP problems, e.g. neural machine translation (NMT), text summerization, text generation. In terms of conducting text generation with transformer, decoding strategies play an important role and thus cannot be ignored. The easiest approach is generating tokens with the highest probabilities in each timestep.
