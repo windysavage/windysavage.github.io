@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  如何自學python與deep learning
+title:  如何從零開始自學python與deep learning
 date:   2020-10-18 12:01:35 +0800
 description: You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. # Add post description (optional)
 img: 03.jpg
