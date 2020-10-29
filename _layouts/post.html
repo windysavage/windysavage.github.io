@@ -16,14 +16,27 @@ layout: default
             <span>By</span>
             <a href="{{ site.baseurl }}/about/" class="author-name">{{site.data.settings.author.name}}</a>
           </div>
+          
+          <div class="tags">
+            {% assign sortedTags = page.tags | sort %}
+            <small>Tags: </small>
+            {% for tag in sortedTags %}
+              <span class="tag">
+                <small> <a href="{{ site.baseurl }}/tag/{{ tag }}"> #{{ tag }}</a></small>
+              </span> 
+            {% endfor %}
+            <br>
+          </div>
 
+
+          <!-- begin post 
           <span>
             {% for tag in page.tags %}
               {% capture tag_name %}{{ tag }}{% endcapture %}
               <a href="/tag/{{ tag_name }}/"><code class="highligher-rouge"><nobr>{{ tag_name }}</nobr></code>&nbsp;</a>
             {% endfor %}
           </span>
-          <!-- begin post 
+          
           {% if page.tags.size >= 1 %}
           <div class="post__tags">
             {% for tag in page.tags %}

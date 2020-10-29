@@ -3,7 +3,9 @@ layout: post
 title:  如何自學python與deep learning
 date:   2020-10-18 12:01:35 +0800
 image:  03.jpg
-tags:   resource deep-learning
+tags:   
+    - "resource" 
+    - "deep-learning"
 ---
 
 ## 前言
