@@ -1,44 +1,21 @@
-<nav class="pagination">
-  <div class="container">
-    <div class="pagination__list">
-
+<div class="container">
+  <nav class="pagination" role="pagination">
+    <ul>
       {% if paginator.previous_page %}
-      
-      {% if paginator.previous_page == 1 %}
-        <a class="previous-link" href="/">Prev Posts</a>
-      {% else %}
-        <a class="previous-link" href="/page/{{ paginator.previous_page }}/">Prev Posts</a>
-      {% endif %}
-      
-      {% else %}
-        <span class="disabled">Prev Posts</span>
+        {% if paginator.previous_page == 1 %}
+        <p><a class="newer-posts" href="{{ site.baseurl }}/"><i class="fa fa-long-arrow-left" aria-hidden="true"></i></a></p>
+        {% else %}
+        <p><a class="newer-posts" href="{{ site.baseurl }}/page/{{ paginator.previous_page }}/"><i class="fa fa-long-arrow-left" aria-hidden="true"></i></a></p>
+        {% endif %}
       {% endif %}
 
-      <div class="counter-box">
-        {% if paginator.page == 1 %}
-          <span class="active-link">1</span>
-        {% else %}
-          <a href="/">1</a>
-        {% endif %}
-
-
-        {% for count in (2..paginator.total_pages) %}
-
-        {% if count == paginator.page %}
-          <span class="active-link">{{ count }}</span>
-        {% else %}
-          <a class="count-number" href="/page/{{ count }}/">{{ count }}</a>
-        {% endif %}
-        {% endfor %}
-      </div>
-
+      {% if paginator.total_pages > 1 %}
+      <p><span class="page-number">Page {{paginator.page}} of {{paginator.total_pages}}</span></p>
+      {% endif %}
+      
       {% if paginator.next_page %}
-      <a class="next-link" href="{{ site.baseurl }}/page/{{ paginator.next_page }}/">Next Posts</a>
-      {% else %}
-        <span class="disabled">Next Posts</span>
+      <p><a class="older-posts" href="{{ site.baseurl }}/page/{{ paginator.next_page }}/"><i class="fa fa-long-arrow-right" aria-hidden="true"></i></a></p>
       {% endif %}
-
-
-    </div>
-  </div>
-</nav>
+    </ul>
+  </nav>
+</div>

@@ -1,31 +1,35 @@
+title: Hello, world! I'm Windysavage
+description: > # this means to ignore newlines until "baseurl:"
+   Sharing something about NLP and experiences in daily life.
+permalink: ':title/'
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://windysavage.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
+url: "" # the base hostname & protocol for your site, e.g. http://example.com
+site-twitter: #if your site has a twitter account, enter it here
 
+# Author Settings
+author: Windysavage # add your name
+author-img: 01.jpg # add your photo
+about-author: Hi，我是Windysavage，平常喜歡多嘗試美食、閱讀小說及寫程式。這個網站將記錄我在學習或開發NLP相關模型過程中的經驗，除此之外也會記錄一些生活中的所見所聞，希望這些分享可以幫助到有需要的人或是與你產生共鳴。 # add description
+social-twitter: # add your Twitter handle
+social-facebook: # add your Facebook handle
+social-github: windysavage # add your Github handle
+social-linkedin: # add your Linkedin handle
+social-email: water92001@gmail.com # add your Email address
 
-# Build settings
+# Disqus
+# discus-identifier: mr-brown # add your discus identifier
+
+# Tracker
+analytics: UA-180638240-1 # Google Analytics
+
+# Build Settings
 markdown: kramdown
-permalink: pretty
 plugins:
-  - jekyll-paginate
   - jekyll-sitemap
+  - jekyll-paginate
+  - jemoji
 
-paginate: 5
+paginate: 8
 paginate_path: "/page/:num"
 
-
-# Pages Path
-defaults:
-  - scope:
-      path: '_pages'
-    values:
-      permalink: /:basename:output_ext
-
-include:
-  - _pages
-
-
-
-sass:
-  sass_dir: _sass
-  style: compressed
-
+exclude: ["node_modules", "gulpfile.js", "package.json", "yarn.lock"]

@@ -1,0 +1,59 @@
+I"c<h2 id="before-delving-into-the-details">Before delving into the details…</h2>
+<p>Hi, this post is aimed at introducing common decoding strategies for text generation (ex: GPT-2). Decoding strategies play an important role when developing NLG (Natural Language Generation)models, and the choice of decoding algorithm could have huge impact on the quality of generated sequences!</p>
+
+<p>In this post, I will explain what is auto-regressive language generation first, and then I will move on to the introduction of several decoding algorithms.</p>
+
+<h2 id="auto-regressive-language-generation">Auto-regressive language generation</h2>
+<p>Auto-regressive language generation assumes that the element  of output sequence at timestep \(t\) is determined by the input sequence and timesteps before \(t\).</p>
+
+<p><img src="https://i.imgur.com/JKrMxhT.png" alt="" /></p>
+
+<p>where \(W_0\) is the input sequence; \(W_t\) is the word at timestep \(t\); \(T\) is determined by the position of <EOS> token.</EOS></p>
+
+<p>Thanks to the come out of transformer, a well-knowned seq2seq model architecture, researchers now are able to well deal with lots of NLP problems, e.g. neural machine translation (NMT), text summerization, text generation. In terms of conducting text generation with transformer, decoding strategies play an important role and thus cannot be ignored. The easiest approach is generating tokens with the highest probabilities in each timestep.</p>
+
+<h2 id="decoding-strategies-in-text-generation">Decoding strategies in text generation</h2>
+<h4 id="beam-search-bs">Beam search (BS)</h4>
+
+<p>Beam search (BS) is a common-used algorithm for decoding sequences. When decoding, BS consider the probabilty of whole sequence instead of just considering the word with highest probability at each timestep (greedy search). In other words, BS will maintein \(k\) sequences (k is the beam width, you can define it on your own) at the same time, and when there is a new sequence coming, the sequence with lowest probability will be discarded.</p>
+
+<p>But BS still has some drawbacks:</p>
+<ul>
+  <li>It generates similar sequences and thus lost diversity.</li>
+  <li>It is computationally wasteful since your inference time would be amplified by the beam width.</li>
+  <li>With higher beam width, NMT tends to generate shorter sequences (since <EOS> token is more likely to be generated).</EOS></li>
+</ul>
+
+<p>To avoid the repetition of generated sequences, a simple remedy called “n-gram penalty” has come to the stage. The n-gram penalty make sure that there is no n-gram showing up for more than once. That is to say, if there is a generated n-gram has been put into the output sequence before, then its probability would be set to zero.</p>
+
+<h4 id="random-sampling">Random sampling</h4>
+<p>In order to make the output sequences more surprising (which means more similar to humans’ behavior), we need to add some randomness into the decoding process.</p>
+
+<p>Instead of picking tokens with the highest probability, we sample from the distribution of tokens at each timestep.</p>
+
+<p>Besides, we can add a parameter called “Temperature” (range from 0~1) to adjust the distribution of tokens.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c1"># Temperature
+# make higher p much higher ; make lower p much lower
+# _scores: distribution of tokens
+# size of _scores: (bacth_size*num_beams, vocab_size)
+</span>
+<span class="k">if</span> <span class="n">temperature</span> <span class="o">!=</span> <span class="mf">1.0</span><span class="p">:</span>
+    <span class="n">_scores</span> <span class="o">=</span> <span class="n">_scores</span> <span class="o">/</span> <span class="n">temperature</span></code></pre></figure>
+
+<h4 id="top-ktop-p-sampling-nucleus-sampling">Top-K/Top-P Sampling (Nucleus Sampling)</h4>
+
+<p>With sampling, we may face the chance of selecting “weird/improper words” (words with low probability) as our generating tokens. To solve this problem, top-K sampling is introduced to look at tokens with top-K probabilities. That is to say, only top \(K\) tokens will be seen as the candidates of the generating sequence. After that, we can sample a token from the distribution formed by the \(K\) tokens!</p>
+
+<p>Nevertheless, we cannot dynamically change the value of \(K\) case by case. Thus, top-P sampling come to solve this problem by selecting token candidates until their cumulatiove probability achieves a given \(P\). Via top-P sampling, we now can select different amounts of token candidates based on different situations!</p>
+
+<h3 id="reference">Reference</h3>
+<ul>
+  <li><a href="https://huggingface.co/blog/how-to-generate">how to generate from huggingface</a></li>
+  <li><a href="https://github.com/huggingface/transformers">github of Transformers</a></li>
+</ul>
+
+<hr />
+
+<p><small>image from <a href="https://unsplash.com/photos/s9CC2SKySJM">here</a> </small></p>
+:ET

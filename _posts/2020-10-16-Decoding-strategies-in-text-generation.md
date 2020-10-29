@@ -2,12 +2,11 @@
 layout: post
 title:  Decoding strategies in text generation
 date:   2020-10-16 15:01:35 +0800
-image:  02.jpg
-tags:   
-    - "nlp" 
-    - "transformer" 
-    - "deep-learning"
+description: You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. # Add post description (optional)
+img: 02.jpg
+tags: [nlp, transformer, deep-learning] # add tag
 ---
+
 
 ## Before delving into the details...
 Hi, this post is aimed at introducing common decoding strategies for text generation (ex: GPT-2). Decoding strategies play an important role when developing NLG (Natural Language Generation)models, and the choice of decoding algorithm could have huge impact on the quality of generated sequences!
