@@ -3,7 +3,7 @@ layout: post
 title:  Decoding strategies in text generation
 date:   2020-10-16 15:01:35 +0800
 image:  02.jpg
-tags:   NLP transformer deep-learning
+tags:   nlp transformer deep-learning
 ---
 
 ## Before delving into the details...
