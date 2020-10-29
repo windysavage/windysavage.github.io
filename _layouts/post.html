@@ -17,6 +17,13 @@ layout: default
             <a href="{{ site.baseurl }}/about/" class="author-name">{{site.data.settings.author.name}}</a>
           </div>
 
+          <span>
+            {% for tag in page.tags %}
+              {% capture tag_name %}{{ tag }}{% endcapture %}
+              <a href="/tag/{{ tag_name }}"><code class="highligher-rouge"><nobr>{{ tag_name }}</nobr></code>&nbsp;</a>
+            {% endfor %}
+          </span>
+          <!-- begin post 
           {% if page.tags.size >= 1 %}
           <div class="post__tags">
             {% for tag in page.tags %}
@@ -24,6 +31,7 @@ layout: default
             {% endfor %}
           </div>
           {% endif %}
+        -->
         </div>
       </div>
     </div>
