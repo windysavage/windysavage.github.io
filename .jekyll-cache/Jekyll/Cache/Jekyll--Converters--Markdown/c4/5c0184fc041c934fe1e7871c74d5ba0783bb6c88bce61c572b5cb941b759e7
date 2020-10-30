@@ -1,0 +1,64 @@
+I"<h2 id="欲解決的問題">欲解決的問題</h2>
+<p>今天要跟大家介紹的paper是由Salesforce Research於2019年發表的CTRL: A Conditional Transformer Language Model for Controllable Generation。這篇paper要解決的問題是雖然目前使用巨量資料訓練(large scale)的高參數量語言模型(LM)已經可以被用來生成具一定水準的語句，但卻難以保證模型可依據使用者的需求客製化產出的結果。</p>
+
+<p>舉例而言，GPT-2是由OpenAI所開發的語言模型，它的訓練資料足足有40GB之多，參數量則高達15億，是BERT-Large(3.4億個參數)的四倍以上。由此可知，它的文字生成能力應該是在所有語言模型中頂尖的存在。但它的限制是似乎難以控制文字生成的方向，也就是說，若你今天想要生成「武俠小說」和「言情小說」，那麼你就需要訓練或fine-tune兩個GPT-2來做到這件事情，讓我們來看看下方的例子。</p>
+
+<p>下方兩個例子都取自於<a href="https://github.com/Morizeyao/GPT2-Chinese">GPT2-Chinese</a>這個Repo，上面的是開發者利用散文資料集訓練模型後inference的結果，下面則是知名資料科學家兼部落格作者的李孟大大利用金庸小說訓練模型後的生成結果。從結果觀察可知，這兩個結果雖然都是使用GPT-2，但根據你使用的訓練資料不同，也會產出不同的生成結果，或是說這兩個模型的風格(Style)取決於你讓它們學習的資源！</p>
+
+<p><img src="/assets/img/CTRL/01.png" alt="文學散文生成範例" />
+<em>文學散文生成範例</em></p>
+
+<p><img src="/assets/img/CTRL/02.png" alt="武俠小說生成範例" />
+<em>武俠小說生成範例</em></p>
+
+<h2 id="方法介紹high-level與案例">方法介紹(High level)與案例</h2>
+<p>為了可使用同一個模型同時產出不同風格的文字，這篇paper提出的方法是在訓練資料內加入control code(根據論文內容，類別大致上有domain, style, topics, dates, entities, relationships between entities, plotpoints, task-related behavior等幾種)。利用這種訓練方式訓練後，使用者只要在inference時於input sentence前面加上control code，就可以使得模型根據control code生成不同風格的句子，讓我們來看幾個論文中的範例。</p>
+
+<p>上圖是給模型一樣的prompt(A knife)情況下，分別指定這兩句的生成風格為Horror與Reviews。從結果看來，Horror的表現實在是不錯，整個段落看起來就像是描述某個恐怖片的場景，也融入了一些跟恐怖相關的詞彙(如horror, scream, spider等等)。Reviews部分的表現也還不錯，整篇段落看起來就像是在描述knife的使用情況。</p>
+
+<p>下圖是作者嘗試不給模型任何的prompt，只提供了風格指引(science title or politics title)的情況下，模型生成的結果。science title所產出的句子就真的非常類似科學相關文章，在描述一種被新發現細菌的特性。但politics title的生成結果我卻比較難以看出它與政治的關聯性，也許是因為政治與經濟詞彙常常同時出現在文章中？</p>
+
+<p><img src="/assets/img/CTRL/03.png" alt="範例1" />
+<em>範例1</em></p>
+
+<p><img src="/assets/img/CTRL/04.png" alt="範例2" />
+<em>範例2</em></p>
+
+<h2 id="方法介紹low-level">方法介紹(Low level)</h2>
+
+<p>那麼這個模型是怎麼學到這件事情的呢？若你知道什麼是Auto-regressive language model，那麼答案也就呼之欲出了。Auto-regressive model指的是一種利用前次自己所生成的文字當作input sentence的一部分繼續往下生成的一種模型，從數學上來說就可以表示成下面這個樣子。</p>
+
+<p>假設你想要生成的文章有\(n\)個字，第\(x_i\)個字的機率分佈則取決於前面所有輸出字的結果。所以你應該可以想像的到，假設今天我給模型的prompt(也就是input sentence的前幾個字)是「早安」，那麼模型就可以用輸入「早」與「安」這兩個字後所得到的\(p(x_1\mid x_{&lt;i})\)加上自己定義的decoding strategy(可以greedy選機率最大的字)，我們就可以得到在這個時間點的輸出，假設是「你」。接著，模型會將這次的輸入與輸出的接在一起以得到下一步的輸入，也就是「早」「安」「你」，再將這個input sequence輸入模型後得到下一個機率分佈…以此類推…直到產生的句子長度達到你規定的\(n\)為止。</p>
+
+<p>[\begin{align}
+    p(x) = 1
+\end{align}]</p>
+
+<p>所以說穿了其實CTRL的方法非常直覺，它的做法是在訓練時上面的公式加入control code \(c\)，也就是讓模型不只是根據你給的prompt進行預測，而是還要加上你自己定義的control code，公式則可以表示為下方這個樣子。</p>
+
+<p>是不是非常直覺？訓練時只要將input sentence前面加上各自的control code就行了。。</p>
+
+<h2 id="penalized-sampling">Penalized sampling</h2>
+
+<p>除此之外，這篇paper有一部分是討論auto-regressive model在decoding strategy方面的選擇。作者認為，目前常用的方法往往面臨以下矛盾：</p>
+
+<ul>
+  <li>當你用sampling決定下一個字的同時，就表示你不信任這個模型輸出的機率分佈，因為你不希望總是使用最高機率的字作為輸出(greedy)。</li>
+  <li>當你用greedy sampling，模型的輸出又傾向於產生重複且冗餘詞彙，極大地影響句子順暢性與可讀性。</li>
+</ul>
+
+<p>因此，作者提出了penalized sampling，一個接近greedy sampling但可防止產生重複詞彙的方法。他的想法也非常直觀，就是將前面已經產生過的字的機率值調低，也就是說，如果我前面已經生成了「早」「安」「你」「好」這四個字，那麼接下來這四個字的機率將會被調降，避免模型使用他們做為輸出。</p>
+
+<p>這邊的\(T(temperature)\)是用來改變機率分佈的形狀，根據實驗結果作者認為使用\(θ=1.2\)加上greedy sampling可產出較高品質的句子且生成避免重複詞彙。</p>
+
+<h2 id="結語">結語</h2>
+
+<p>這篇paper提出的方法其實也可以應用在fine-tine GPT-2，只要我們將定義好的style加入input sentence，應該就可以做出論文上的效果。但麻煩的是你必須要根據自己定義的風格去label資料，這篇paper則是利用他們在收集資料時資料來源伴隨的資訊進行label (ex: 資料來源網站URL, 不同的title資訊等等)。也許可以試著利用wikipedia和Google map reviews中的語料進行訓練，讓你的模型同時學會寫評論跟寫百科！</p>
+
+<h2 id="reference">Reference</h2>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/1909.05858">https://arxiv.org/abs/1909.05858</a></li>
+  <li><a href="https://github.com/Morizeyao/GPT2-Chinese">https://github.com/Morizeyao/GPT2-Chinese</a></li>
+</ul>
+:ET

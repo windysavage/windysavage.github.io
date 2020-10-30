@@ -2,7 +2,7 @@
 layout: post
 title:  Decoding strategies in text generation
 date:   2020-10-16 15:01:35 +0800
-description: You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. # Add post description (optional)
+description: introduce decoding strategies for text generation task
 img: 02.jpg
 tags: [nlp, transformer, deep-learning] # add tag
 ---
