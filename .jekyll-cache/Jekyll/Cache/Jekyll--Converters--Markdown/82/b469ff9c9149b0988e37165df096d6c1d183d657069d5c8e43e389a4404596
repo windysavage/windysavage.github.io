@@ -1,0 +1,66 @@
+I"�<h2 id="欲解決的問題">欲解決的問題</h2>
+<p>今天要跟大家介紹的paper是由Uber research所推出的<strong>PPLM (plug and play language model)</strong>，這篇的目的是為了解決以下兩個問題:</p>
+<ul>
+  <li>使用者難以控制藉由large scale pretraining訓練而得的text generation model (ex: GPT series)，故希望能有一種方法可控制生成方向</li>
+  <li>為了控制生成方向，也有開發者利用在training data前面加上control codes的方法以控制模型，但缺點是這種方法需要你重新訓練或fine-tine大型模型，增加許多成本 (其實就是前一篇文章中分享的CTRL)</li>
+</ul>
+
+<h2 id="方法介紹-high-level">方法介紹 (High Level)</h2>
+<p>這篇paper的想法來自於電腦視覺(CV)領域，Plug &amp; Play Generative Networks(PPGN) 可以利用不同的attributes控制圖片生成方向，它的做法是在原有的圖片生成模型\(p(x)\)後加入一個discriminator \(p(a|x)\) (attribute model)，此discriminator的功能是判斷給定的輸入\(x\)屬於\(a\)這個attribute的可能性有多高。而且根據貝氏定理，\(p(x|a) \propto p(a|x)p(x)\)。所以理論上我們應該可以在NLP領域做到類似的事情，也就是<strong>利用一般的大型語言模型(ex: GPT-2)加上一個或多個可以判斷一段語句是否符合我們想要的風格的classfier，就可以控制語言模型的生成方向</strong>。</p>
+
+<p>總而言之，開發者若要製作可以生成特定風格(方向)的LM，則需要以下幾個要素:</p>
+<ul>
+  <li>一個強大的文字生成模型，像是GPT-2就很適合</li>
+  <li>特定風格的分類器，像是情緒正負向判斷或判斷是否符合特定主題(education, politics, millitary…)
+<br /><strong>前者負責\(p(x)\)，後者負責\(p(a|x)\)。</strong></li>
+</ul>
+
+<h2 id="方法介紹-low-level">方法介紹 (Low Level)</h2>
+<p>首先，我們先來看看不考慮風格的文字生成模型(LM)是如何根據你給的輸入產出接下來的字。
+假設今天有一組給定的輸入序列\(X=\{x_0,...,x_n\}\)，LM則是被用來預測\(p(x)\)且\(p(x)\)可以被表示為下列這個式子:</p>
+<p style="text-align: center; font-size:150%;">
+$
+   p(x) = \prod \limits_{i=1}^np(x_i\mid x_0,...,x_{i-1})
+$
+</p>
+
+<p>接下來，我們定義在第\(t\)個time-step時模型第\(i\)層的key-value pair為:</p>
+<p style="text-align: center; font-size:150%;">
+$
+   (K^{(i)}_t,V^{(i)}_t)
+$
+</p>
+
+<p>且紀錄這些資訊的history matrix，\(H_t\)為:</p>
+<p style="text-align: center; font-size:150%;">
+$
+   H_t=[(K^{(1)}_t,V^{(1)}_t),...,(K^{(l)}_t,V^{(l)}_t)]
+$
+</p>
+
+<p>所以，在第\(t+1\)的時間點，模型輸出的logits(\(o_{t+1}\), 未通過softmax的outputs)與當時的history matrix可被表示為:</p>
+<p style="text-align: center; font-size:150%;">
+$
+   o_{t+1},H_{t+1}=LM(x_t,H_t)
+$
+</p>
+
+<p>但因為我們需要預測的是下一個字的機率分佈，所以必須把\(o_{t+1}\)映射到等同於Vocabulary size的維度(若Vocabulary有50000字，則映射到50000維)。接著再通過Softmax函數產生機率分佈</p>
+<p style="text-align: center; font-size:150%;">
+$
+   p_{t+1}=Softmax(Wo_{t+1})
+$
+</p>
+
+<p>根據你的機率分佈和decoding的方法，sample出下一個字。decoding的方法可以是greedy, random sampling, top-k sampling, top-p sampling…等等！</p>
+
+<p>從上述的流程中我們可以發現，\(x_t\)和\(H_t\)都會影響模型生成的方向，但我們在這邊不希望改變\(x_t\)因此PPLM的精髓就是透過\(H_t\)以控制文字生成。具體而言，\(H_t\)的控制目標為最大化\(p(x)\)和\(p(a\mid x)\)，也就是兼顧通順度與契合特定風格的程度。既然我們需要最大化以上兩種機率，方法當然就是利用常用的gradient descent來達成。也就是說，給定一預先訓練好的大型LM、特定風格的分類器及輸入，PPLM就是在維持模型都不變的情況下利用gradient descent改變\(H_t\)，而改變的方向為最大化\(p(x)\)和\(p(a\mid x)\)。</p>
+
+<p>因此，我們令\(\Delta H_t\)為\(H_t\)為了最佳化\(p(a\mid x)\)所需要的修正量，則\((H_t+\Delta H_t)\)會移動模型最終產出的機率分佈，讓每一個生成的字都更接近你設定的\(p(a\mid x)\)。我們可以將\(p(a\mid x)\)改寫成\(p(a\mid H_t+\Delta H_t)\)還有更新的過程可以被表示為</p>
+<p style="text-align: center; font-size:150%;">
+$
+   \Delta H_t \leftarrow \Delta H_t + \alpha \frac {logp(a \mid H_t+\Delta H_t)}{\|logp(a \mid H_t+\Delta H_t)^\gamma \|}
+$
+</p>
+
+:ET
