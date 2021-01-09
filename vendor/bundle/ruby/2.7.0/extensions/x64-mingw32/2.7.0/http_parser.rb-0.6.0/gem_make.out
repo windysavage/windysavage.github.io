@@ -1,0 +1,20 @@
+current directory: D:/RH/09-project/16-site-blog/windysavage.github.io/vendor/bundle/ruby/2.7.0/gems/http_parser.rb-0.6.0/ext/ruby_http_parser
+C:/Ruby27-x64/bin/ruby.exe -I C:/Ruby27-x64/lib/ruby/site_ruby/2.7.0 -r ./siteconf20210109-10840-15tbxfs.rb extconf.rb
+creating Makefile
+
+current directory: D:/RH/09-project/16-site-blog/windysavage.github.io/vendor/bundle/ruby/2.7.0/gems/http_parser.rb-0.6.0/ext/ruby_http_parser
+make "DESTDIR=" clean
+bash.exe: warning: could not find /tmp, please create!
+
+current directory: D:/RH/09-project/16-site-blog/windysavage.github.io/vendor/bundle/ruby/2.7.0/gems/http_parser.rb-0.6.0/ext/ruby_http_parser
+make "DESTDIR="
+generating ruby_http_parser-x64-mingw32.def
+bash.exe: warning: could not find /tmp, please create!
+compiling ruby_http_parser.c
+compiling ryah_http_parser.c
+linking shared-object ruby_http_parser.so
+
+current directory: D:/RH/09-project/16-site-blog/windysavage.github.io/vendor/bundle/ruby/2.7.0/gems/http_parser.rb-0.6.0/ext/ruby_http_parser
+make "DESTDIR=" install
+bash.exe: warning: could not find /tmp, please create!
+/usr/bin/install -c -m 0755 ruby_http_parser.so ./.gem.20210109-10840-nhjv56

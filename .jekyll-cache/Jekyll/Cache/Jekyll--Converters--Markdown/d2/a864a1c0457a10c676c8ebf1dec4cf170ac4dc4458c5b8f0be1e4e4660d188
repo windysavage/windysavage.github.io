@@ -1,0 +1,51 @@
+I"�<h2 id="前言">前言</h2>
+<p>寫這篇文章的主要目的是整理之前曾經參加過的競賽，2019時我剛接觸Deep learning不久，那時因為課程要求所以參加了AI Cup 2019的論文標註競賽。現在回頭看起來，當初的程式碼與想法實在是不夠嚴謹與細緻，連最基本得版本、環境控管都沒做哈哈。所以這篇文章內容並不會很專業，畢竟當時的我也才剛接觸不久而已。</p>
+
+<h2 id="競賽說明">競賽說明</h2>
+<p>這個競賽的目的是，給定一個論文摘要(Abstract)，你必須要建立一個模型判斷該摘要中的每一個句子是屬於哪種寫法(background, method, result…等等)。值得注意的是，每一個句子的label不一定只有一個，也就是說可能會有一些句子同時屬於background/method這兩種寫法之類的。這就是當初的我認為比較有挑戰性的地方，因為通常我們做classification problem的時候，每個\(x\)都只會對應一個label \(y\)。更詳細的競賽說明可以到<a href="https://tbrain.trendmicro.com.tw/Competitions/Details/8">這裡</a>看</p>
+
+<h2 id="解題思考">解題思考</h2>
+<p>現在開始review我當初的解題過程。</p>
+<ol>
+  <li>
+    <p>因為這個任務是NLP相關，故很直接的我一開始以資料清理+RNN系列模型來處理。首先我可以將不必要的雜訊去除，以及將一些可以整合成一類的詞彙代換成別的token(像是美國、中國等等都可以是<b>COUNTRY</b>這個token)。至於模型，我一開始使用的是LSTM，但其實效果並沒有很理想。</p>
+  </li>
+  <li>
+    <p>接下來，我覺得可以利用更強的模型去做language modeling，所以直接使用當時很強大的BERT，而且<a href="https://tfhub.dev/">tensorflow hub</a>很佛心地有提供各種他們已經pre-train過的模型，我只要挑自己需要的即可。除此之外，因為BERT在處理input的時候已經有某種preprocessing的效果，所以我在這時候選擇先不做任何前處理，讓子彈飛一會兒，試試看BERT的實力</p>
+  </li>
+</ol>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1"># 從tensorflow hub撈我需要的模型</span>
+<span class="n">bert_layer</span> <span class="o">=</span> <span class="n">hub</span><span class="o">.</span><span class="no">KerasLayer</span><span class="p">(</span><span class="s2">"https://tfhub.dev/tensorflow/bert_en_uncased_L-12_H-768_A-12/1"</span><span class="p">,</span> <span class="n">trainable</span><span class="o">=</span><span class="no">True</span><span class="p">)</span>
+<span class="n">vocab_file</span> <span class="o">=</span> <span class="n">bert_layer</span><span class="p">.</span><span class="nf">resolved_object</span><span class="p">.</span><span class="nf">vocab_file</span><span class="p">.</span><span class="nf">asset_path</span><span class="p">.</span><span class="nf">numpy</span><span class="p">()</span>
+<span class="n">do_lower_case</span> <span class="o">=</span> <span class="n">bert_layer</span><span class="p">.</span><span class="nf">resolved_object</span><span class="p">.</span><span class="nf">do_lower_case</span><span class="p">.</span><span class="nf">numpy</span><span class="p">()</span>
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">bert_tokenization</span><span class="o">.</span><span class="no">FullTokenizer</span><span class="p">(</span><span class="n">vocab_file</span><span class="p">,</span> <span class="n">do_lower_case</span><span class="p">)</span></code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="c1"># 開始將input data轉換成BERT看得懂的形式</span>
+<span class="k">def</span> <span class="nf">get_masks</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">max_seq_length</span><span class="p">):</span>
+    <span class="s2">"""Mask for padding"""</span>
+    <span class="k">if</span> <span class="n">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span><span class="o">&gt;</span><span class="ss">max_seq_length:
+        </span><span class="k">raise</span> <span class="no">IndexError</span><span class="p">(</span><span class="s2">"Token length more than max seq length!"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">max_seq_length</span> <span class="o">-</span> <span class="n">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">get_segments</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">max_seq_length</span><span class="p">):</span>
+    <span class="s2">"""Segments: 0 for the first sequence, 1 for the second"""</span>
+    <span class="k">if</span> <span class="n">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span><span class="o">&gt;</span><span class="ss">max_seq_length:
+        </span><span class="k">raise</span> <span class="no">IndexError</span><span class="p">(</span><span class="s2">"Token length more than max seq length!"</span><span class="p">)</span>
+    <span class="n">segments</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">current_segment_id</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">token</span> <span class="k">in</span> <span class="ss">tokens:
+        </span><span class="n">segments</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">current_segment_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="o">==</span> <span class="s2">"[SEP]"</span><span class="p">:</span>
+            <span class="n">current_segment_id</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">segments</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">max_seq_length</span> <span class="o">-</span> <span class="n">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">get_ids</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">tokenizer</span><span class="p">,</span> <span class="n">max_seq_length</span><span class="p">):</span>
+    <span class="s2">"""Token ids from Tokenizer vocab"""</span>
+    <span class="n">token_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">.</span><span class="nf">convert_tokens_to_ids</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+    <span class="n">input_ids</span> <span class="o">=</span> <span class="n">token_ids</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">max_seq_length</span><span class="o">-</span><span class="n">len</span><span class="p">(</span><span class="n">token_ids</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">input_ids</span></code></pre></figure>
+
+:ET
